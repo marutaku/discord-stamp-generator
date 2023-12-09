@@ -7,7 +7,7 @@ This is a command-line application that generates Discord stamps.
 To install the application, you need to have Go installed on your machine. Then, you can clone this repository and build the application.
 
 ```sh
-git clone https://github.com/yourusername/discord-stamp-generator.git
+git clone https://github.com/marutaku/discord-stamp-generator.git
 cd discord-stamp-generator
 go build
 ```
