@@ -37,6 +37,40 @@ func createOptionFromCmd(cmd *cobra.Command) (*GenerateCmdOptions, error) {
 	}, nil
 }
 
+func generateStamp(cmd *cobra.Command, args []string) {
+	if len(args) == 0 {
+		fmt.Println("Please specify a text.")
+		os.Exit(1)
+	}
+	text := args[0]
+	options, err := createOptionFromCmd(cmd)
+	if err != nil {
+		fmt.Printf("Failed to parse options: %v\n", err)
+		os.Exit(1)
+	}
+	generator, err := stamp.NewGenerator(80, 360, 360, options.FontColor, options.FontPath)
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+	imageBytes, err := generator.Generate(text)
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+
+	// Export image
+	if options.OutputFilePath == "" {
+		os.Stdout.Write(imageBytes)
+	} else {
+		err = stamp.Export(imageBytes, options.OutputFilePath)
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
+	}
+}
+
 // generateCmd represents the generate command
 var generateCmd = &cobra.Command{
 	Use:   "generate",
@@ -46,40 +80,7 @@ The generated image is saved as a PNG file and optimized for Discord.
 For example:
 	stamp generate "Hello, World!" -o hello.png
 `,
-	Run: func(cmd *cobra.Command, args []string) {
-		if len(args) == 0 {
-			fmt.Println("Please specify a text.")
-			os.Exit(1)
-		}
-		text := args[0]
-		options, err := createOptionFromCmd(cmd)
-		if err != nil {
-			fmt.Printf("Failed to parse options: %v\n", err)
-			os.Exit(1)
-		}
-		generator, err := stamp.NewGenerator(128, 128, 128, options.FontColor, options.FontPath)
-		if err != nil {
-			fmt.Println(err)
-			os.Exit(1)
-		}
-		imageBytes, err := generator.Generate(text)
-		if err != nil {
-			fmt.Println(err)
-			os.Exit(1)
-		}
-
-		// Export image
-		if options.OutputFilePath == "" {
-			os.Stdout.Write(imageBytes)
-		} else {
-			err = stamp.Export(imageBytes, options.OutputFilePath)
-			if err != nil {
-				fmt.Println(err)
-				os.Exit(1)
-			}
-		}
-
-	},
+	Run: generateStamp,
 }
 
 func init() {
@@ -87,14 +88,4 @@ func init() {
 	generateCmd.Flags().StringP("output", "o", "", "Output file path")
 	generateCmd.Flags().StringP("font-filepath", "f", "", "External font path")
 	generateCmd.Flags().StringP("font-color", "c", "#000000", "Font color")
-
-	// Here you will define your flags and configuration settings.
-
-	// Cobra supports Persistent Flags which will work for this command
-	// and all subcommands, e.g.:
-	// generateCmd.PersistentFlags().String("foo", "", "A help for foo")
-
-	// Cobra supports local flags which will only run when this command
-	// is called directly, e.g.:
-	// generateCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 }
