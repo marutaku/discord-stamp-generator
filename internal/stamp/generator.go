@@ -71,12 +71,13 @@ func (g *Generator) Generate(text string) ([]byte, error) {
 		Src:  g.FontColor,
 		Face: g.Font,
 	}
-
-	fmt.Println(g.Font.Metrics())
+	imageCenterY := g.Height / 2
+	fmt.Printf("imageCenterY: %d\n", imageCenterY)
 	lines := splitTextIntoLines(text, g.Font.Metrics().Height.Ceil(), g.Width)
 	totalTextHeight := g.Font.Metrics().Height.Ceil() * len(lines)
 	fmt.Printf("totalTextHeight: %d\n", totalTextHeight)
-	startY := (g.Height - totalTextHeight) / 2
+	// FIXME: I don't know why I need to divide by 4
+	startY := imageCenterY + totalTextHeight/4
 	fmt.Printf("startY: %d\n", startY)
 	for i, line := range lines {
 		fmt.Printf("line: %s\n", line)
