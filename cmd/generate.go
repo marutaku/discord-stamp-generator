@@ -48,7 +48,16 @@ func generateStamp(cmd *cobra.Command, args []string) {
 		fmt.Printf("Failed to parse options: %v\n", err)
 		os.Exit(1)
 	}
-	imageBytes, err := stamp.Generate(text, 360, 360, options.FontColor, options.FontPath)
+	fontColor := options.FontColor
+	fmt.Println(fontColor)
+	if fontColor == "" {
+		fontColor, err = stamp.GenerateRandomHexColor()
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
+	}
+	imageBytes, err := stamp.Generate(text, 360, 360, fontColor, options.FontPath)
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(1)
@@ -82,5 +91,5 @@ func init() {
 	rootCmd.AddCommand(generateCmd)
 	generateCmd.Flags().StringP("output", "o", "", "Output file path")
 	generateCmd.Flags().StringP("font-filepath", "f", "", "External font path")
-	generateCmd.Flags().StringP("font-color", "c", "#000000", "Font color")
+	generateCmd.Flags().StringP("font-color", "c", "", "Font color")
 }

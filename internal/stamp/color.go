@@ -1,9 +1,27 @@
 package stamp
 
 import (
+	"crypto/rand"
 	"fmt"
 	"image/color"
+	"math/big"
 )
+
+func GenerateRandomHexColor() (string, error) {
+	red, err := rand.Int(rand.Reader, big.NewInt(255))
+	if err != nil {
+		return "", err
+	}
+	green, err := rand.Int(rand.Reader, big.NewInt(255))
+	if err != nil {
+		return "", err
+	}
+	blue, err := rand.Int(rand.Reader, big.NewInt(255))
+	if err != nil {
+		return "", err
+	}
+	return fmt.Sprintf("#%02x%02x%02x", red, green, blue), nil
+}
 
 // https://stackoverflow.com/questions/54197913/parse-hex-string-to-image-color
 func ParseHexColor(s string) (c color.RGBA, err error) {
