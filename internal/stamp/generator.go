@@ -17,6 +17,7 @@ import (
 	"golang.org/x/image/math/fixed"
 )
 
+var MARGIN_PER_LINE = 24
 var MIN_CHAR_NUM_IN_LINE = 3
 
 func splitTextIntoLines(text string) []string {
@@ -34,11 +35,9 @@ func splitTextIntoLines(text string) []string {
 
 func drawLines(drawer *font.Drawer, lines []string, startY int, lineHeight int, imgWith int) {
 	for i, line := range lines {
-		fmt.Printf("line: %s\n", line)
-		y := startY + lineHeight*i
+		y := startY + lineHeight*i + MARGIN_PER_LINE*i
 		fmt.Printf("y: %d\n", y)
 		textWidth := drawer.MeasureString(line).Round()
-		fmt.Printf("textWidth: %d\n", textWidth)
 		x := (imgWith - textWidth) / 2
 		drawer.Dot = fixed.Point26_6{X: fixed.I(x), Y: fixed.I(y)}
 		drawer.DrawString(line)
@@ -48,7 +47,9 @@ func drawLines(drawer *font.Drawer, lines []string, startY int, lineHeight int, 
 func decideStartY(imgHeight int, fontHeight int, lineNum int) int {
 	imageCenterY := imgHeight / 2
 	totalTextHeight := fontHeight * lineNum
-	return imageCenterY - totalTextHeight/2 + fontHeight
+	margin := (MARGIN_PER_LINE / 2) * (lineNum - 1)
+	fmt.Printf("imageCenterY: %d, totalTextHeight: %d, margin: %d\n", imageCenterY, totalTextHeight, margin)
+	return imageCenterY - totalTextHeight/2 + fontHeight - margin
 }
 
 func Generate(text string, width int, height int, fontColor string, externalFontPath string) ([]byte, error) {

@@ -49,7 +49,6 @@ func generateStamp(cmd *cobra.Command, args []string) {
 		os.Exit(1)
 	}
 	fontColor := options.FontColor
-	fmt.Println(fontColor)
 	if fontColor == "" {
 		fontColor, err = stamp.GenerateRandomHexColor()
 		if err != nil {
