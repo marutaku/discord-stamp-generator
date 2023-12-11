@@ -15,6 +15,7 @@ type GenerateCmdOptions struct {
 	OutputFilePath string
 	FontPath       string
 	FontColor      string
+	OneLine        bool
 }
 
 func createOptionFromCmd(cmd *cobra.Command) (*GenerateCmdOptions, error) {
@@ -30,10 +31,15 @@ func createOptionFromCmd(cmd *cobra.Command) (*GenerateCmdOptions, error) {
 	if err != nil {
 		return nil, err
 	}
+	oneLine, err := cmd.Flags().GetBool("one-line")
+	if err != nil {
+		return nil, err
+	}
 	return &GenerateCmdOptions{
 		OutputFilePath: outputFilePath,
 		FontPath:       font,
 		FontColor:      fontColor,
+		OneLine:        oneLine,
 	}, nil
 }
 
@@ -56,7 +62,7 @@ func generateStamp(cmd *cobra.Command, args []string) {
 			os.Exit(1)
 		}
 	}
-	imageBytes, err := stamp.Generate(text, 360, 360, fontColor, options.FontPath)
+	imageBytes, err := stamp.Generate(text, 360, 360, fontColor, options.FontPath, options.OneLine)
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(1)
@@ -91,4 +97,5 @@ func init() {
 	generateCmd.Flags().StringP("output", "o", "", "Output file path")
 	generateCmd.Flags().StringP("font-filepath", "f", "", "External font path")
 	generateCmd.Flags().StringP("font-color", "c", "", "Font color")
+	generateCmd.Flags().BoolP("one-line", "", false, "Force to generate a stamp image in one line")
 }

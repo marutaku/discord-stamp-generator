@@ -52,8 +52,13 @@ func decideStartY(imgHeight int, fontHeight int, lineNum int) int {
 	return imageCenterY - totalTextHeight/2 + fontHeight - margin
 }
 
-func Generate(text string, width int, height int, fontColor string, externalFontPath string) ([]byte, error) {
-	lines := splitTextIntoLines(text)
+func Generate(text string, width int, height int, fontColor string, externalFontPath string, shouldOneLine bool) ([]byte, error) {
+	var lines []string
+	if shouldOneLine {
+		lines = []string{text}
+	} else {
+		lines = splitTextIntoLines(text)
+	}
 	fontColorRGBA, err := ParseHexColor(fontColor)
 	if err != nil {
 		return nil, err
@@ -75,6 +80,9 @@ func Generate(text string, width int, height int, fontColor string, externalFont
 	startY := decideStartY(height, fontHeight, len(lines))
 	drawLines(drawer, lines, startY, fontHeight, width)
 	buffer := new(bytes.Buffer)
-	png.Encode(buffer, img)
+	err = png.Encode(buffer, img)
+	if err != nil {
+		return nil, err
+	}
 	return buffer.Bytes(), nil
 }
