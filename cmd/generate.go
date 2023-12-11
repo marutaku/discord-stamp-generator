@@ -48,12 +48,7 @@ func generateStamp(cmd *cobra.Command, args []string) {
 		fmt.Printf("Failed to parse options: %v\n", err)
 		os.Exit(1)
 	}
-	generator, err := stamp.NewGenerator(80, 360, 360, options.FontColor, options.FontPath)
-	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
-	}
-	imageBytes, err := generator.Generate(text)
+	imageBytes, err := stamp.Generate(text, 360, 360, options.FontColor, options.FontPath)
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(1)

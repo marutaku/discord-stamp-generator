@@ -9,87 +9,70 @@ import (
 	"fmt"
 	"image"
 	"image/png"
+	"math"
 	"strings"
+	"unicode/utf8"
 
 	"golang.org/x/image/font"
 	"golang.org/x/image/math/fixed"
 )
 
-type Generator struct {
-	Font      font.Face
-	FontColor *image.Uniform
-	Width     int
-	Height    int
+var MIN_CHAR_NUM_IN_LINE = 3
+
+func splitTextIntoLines(text string) []string {
+	words := strings.Split(text, "")
+	lengthOfText := len(words)
+	if lengthOfText <= MIN_CHAR_NUM_IN_LINE {
+		return []string{text}
+	}
+	middleOfWords := int(math.Ceil(float64(lengthOfText) / 2))
+	return []string{
+		strings.Join(words[:middleOfWords], ""),
+		strings.Join(words[middleOfWords:], ""),
+	}
 }
 
-func NewGenerator(fontSize float64, width int, height int, fontColor string, externalFontPath string) (*Generator, error) {
-	font, err := LoadFont(fontSize, externalFontPath)
-	if err != nil {
-		return nil, err
+func drawLines(drawer *font.Drawer, lines []string, startY int, lineHeight int, imgWith int) {
+	for i, line := range lines {
+		fmt.Printf("line: %s\n", line)
+		y := startY + lineHeight*i
+		fmt.Printf("y: %d\n", y)
+		textWidth := drawer.MeasureString(line).Round()
+		fmt.Printf("textWidth: %d\n", textWidth)
+		x := (imgWith - textWidth) / 2
+		drawer.Dot = fixed.Point26_6{X: fixed.I(x), Y: fixed.I(y)}
+		drawer.DrawString(line)
 	}
+}
+
+func decideStartY(imgHeight int, fontHeight int, lineNum int) int {
+	imageCenterY := imgHeight / 2
+	totalTextHeight := fontHeight * lineNum
+	return imageCenterY - totalTextHeight/2 + fontHeight
+}
+
+func Generate(text string, width int, height int, fontColor string, externalFontPath string) ([]byte, error) {
+	lines := splitTextIntoLines(text)
 	fontColorRGBA, err := ParseHexColor(fontColor)
 	if err != nil {
 		return nil, err
 	}
-	return &Generator{
-		Font:      font,
-		Width:     width,
-		Height:    height,
-		FontColor: image.NewUniform(fontColorRGBA),
-	}, nil
-}
-
-func splitTextIntoLines(text string, fontWidth int, maxWidth int) []string {
-	words := strings.Fields(text)
-	var lines []string
-	var currentLine string
-	for _, word := range words {
-		fmt.Println((len(currentLine) + len(word) + 1))
-		if (len(currentLine) + len(word) + 1) > maxWidth {
-			fmt.Println("Append new line")
-			lines = append(lines, currentLine)
-			currentLine = word
-		} else {
-			if currentLine != "" {
-				currentLine += " "
-			}
-			currentLine += word
-		}
+	fontSize := CalculateFontSize(utf8.RuneCountInString(lines[0]), width)
+	fontFace, err := LoadFont(fontSize, externalFontPath)
+	if err != nil {
+		return nil, err
 	}
-	if currentLine != "" {
-		lines = append(lines, currentLine)
-	}
-	return lines
-}
-
-func (g *Generator) Generate(text string) ([]byte, error) {
 	// Initialize image
-	rect := image.Rect(0, 0, g.Width, g.Height)
+	rect := image.Rect(0, 0, width, height)
 	img := image.NewRGBA(rect)
 	drawer := &font.Drawer{
 		Dst:  img,
-		Src:  g.FontColor,
-		Face: g.Font,
+		Src:  image.NewUniform(fontColorRGBA),
+		Face: fontFace,
 	}
-	imageCenterY := g.Height / 2
-	fmt.Printf("imageCenterY: %d\n", imageCenterY)
-	lines := splitTextIntoLines(text, g.Font.Metrics().Height.Ceil(), g.Width)
-	totalTextHeight := g.Font.Metrics().Height.Ceil() * len(lines)
-	fmt.Printf("totalTextHeight: %d\n", totalTextHeight)
-	// FIXME: I don't know why I need to divide by 4
-	startY := imageCenterY + totalTextHeight/4
-	fmt.Printf("startY: %d\n", startY)
-	for i, line := range lines {
-		fmt.Printf("line: %s\n", line)
-		y := startY + g.Font.Metrics().Height.Ceil()*i
-		fmt.Printf("y: %d\n", y)
-		textWidth := drawer.MeasureString(line).Round()
-		fmt.Printf("textWidth: %d\n", textWidth)
-		x := (g.Width - textWidth) / 2
-		drawer.Dot = fixed.Point26_6{X: fixed.I(x), Y: fixed.I(y)}
-		drawer.DrawString(line)
-	}
-
+	fontHeight := fontFace.Metrics().CapHeight.Ceil()
+	startY := decideStartY(height, fontHeight, len(lines))
+	drawLines(drawer, lines, startY, fontHeight, width)
 	buffer := new(bytes.Buffer)
 	png.Encode(buffer, img)
 	return buffer.Bytes(), nil

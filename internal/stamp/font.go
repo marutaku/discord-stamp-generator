@@ -9,11 +9,14 @@ import (
 	"golang.org/x/image/font/opentype"
 )
 
-// go:embed NotoSansJP-Regular.ttf
+//go:embed NotoSansJP-ExtraBold.ttf
 var notoSansJPFontFile []byte
 
-func LoadFont(fontSize float64, externalFontFilePath string) (font.Face, error) {
+func CalculateFontSize(maxChatNumInOneLine int, width int) float64 {
+	return float64(width) / float64(maxChatNumInOneLine)
+}
 
+func LoadFont(fontSize float64, externalFontFilePath string) (font.Face, error) {
 	fontFile := notoSansJPFontFile
 	if externalFontFilePath != "" {
 		var err error
