@@ -17,8 +17,10 @@ import (
 	"golang.org/x/image/math/fixed"
 )
 
-var MARGIN_PER_LINE = 24
-var MIN_CHAR_NUM_IN_LINE = 3
+const (
+	MARGIN_PER_LINE      = 24
+	MIN_CHAR_NUM_IN_LINE = 3
+)
 
 func splitTextIntoLines(text string) []string {
 	words := strings.Split(text, "")

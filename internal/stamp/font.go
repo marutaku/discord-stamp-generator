@@ -12,10 +12,12 @@ import (
 //go:embed NotoSansJP-ExtraBold.ttf
 var notoSansJPFontFile []byte
 
+// CalculateFontSize calculates the font size based on the maximum number of characters in one line and the width.
 func CalculateFontSize(maxChatNumInOneLine int, width int) float64 {
 	return float64(width) / float64(maxChatNumInOneLine)
 }
 
+// LoadFont loads the font based on the font size and the external font file path.
 func LoadFont(fontSize float64, externalFontFilePath string) (font.Face, error) {
 	fontFile := notoSansJPFontFile
 	if externalFontFilePath != "" {
@@ -42,6 +44,7 @@ func LoadFont(fontSize float64, externalFontFilePath string) (font.Face, error) 
 	return face, nil
 }
 
+// loadExternalFontFile loads the external font file.
 func loadExternalFontFile(fontFilePath string) ([]byte, error) {
 	if fontFilePath == "" {
 		return nil, nil
