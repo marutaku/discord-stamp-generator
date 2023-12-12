@@ -6,7 +6,6 @@ package stamp
 
 import (
 	"bytes"
-	"fmt"
 	"image"
 	"image/png"
 	"math"
@@ -38,7 +37,6 @@ func splitTextIntoLines(text string) []string {
 func drawLines(drawer *font.Drawer, lines []string, startY int, lineHeight int, imgWith int) {
 	for i, line := range lines {
 		y := startY + lineHeight*i + MARGIN_PER_LINE*i
-		fmt.Printf("y: %d\n", y)
 		textWidth := drawer.MeasureString(line).Round()
 		x := (imgWith - textWidth) / 2
 		drawer.Dot = fixed.Point26_6{X: fixed.I(x), Y: fixed.I(y)}
@@ -50,7 +48,6 @@ func decideStartY(imgHeight int, fontHeight int, lineNum int) int {
 	imageCenterY := imgHeight / 2
 	totalTextHeight := fontHeight * lineNum
 	margin := (MARGIN_PER_LINE / 2) * (lineNum - 1)
-	fmt.Printf("imageCenterY: %d, totalTextHeight: %d, margin: %d\n", imageCenterY, totalTextHeight, margin)
 	return imageCenterY - totalTextHeight/2 + fontHeight - margin
 }
 

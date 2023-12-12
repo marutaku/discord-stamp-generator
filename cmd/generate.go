@@ -19,28 +19,28 @@ type GenerateCmdOptions struct {
 }
 
 func createOptionFromCmd(cmd *cobra.Command) (*GenerateCmdOptions, error) {
-	outputFilePath, err := cmd.Flags().GetString("output")
+	options := &GenerateCmdOptions{}
+	var err error
+
+	options.OutputFilePath, err = cmd.Flags().GetString("output")
 	if err != nil {
 		return nil, err
 	}
-	font, err := cmd.Flags().GetString("font-filepath")
+	options.FontPath, err = cmd.Flags().GetString("font-filepath")
 	if err != nil {
 		return nil, err
 	}
-	fontColor, err := cmd.Flags().GetString("font-color")
+
+	options.FontColor, err = cmd.Flags().GetString("font-color")
 	if err != nil {
 		return nil, err
 	}
-	oneLine, err := cmd.Flags().GetBool("one-line")
+
+	options.OneLine, err = cmd.Flags().GetBool("one-line")
 	if err != nil {
 		return nil, err
 	}
-	return &GenerateCmdOptions{
-		OutputFilePath: outputFilePath,
-		FontPath:       font,
-		FontColor:      fontColor,
-		OneLine:        oneLine,
-	}, nil
+	return options, nil
 }
 
 func generateStamp(cmd *cobra.Command, args []string) {
